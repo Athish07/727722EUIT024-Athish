@@ -1,5 +1,5 @@
 const express = require('express');
-const axios = require('axios'); // Corrected import
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
@@ -8,53 +8,69 @@ const port = 9877;
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN; // Load token from .env file
 
 // Endpoint for handling different social media data requests
-app.get('/social/:type/:userid?', async (req, res) => {
-  const { type, userid } = req.params; // Destructure 'type' and 'userid' if provided
+app.get('/social/:type/:userid?/:postid?', async (req, res) => {
+  const { type, userid, postid } = req.params;
   let apiUrl;
 
-  // Define routes for different data types, including dynamic route for user posts
+  // Define routes dynamically based on the provided type, user ID, or post ID
   switch (type) {
     case 'posts':
       apiUrl = userid
-        ? `http://20.244.56.144/test/users/${userid}/posts` // User-specific posts
-        : 'http://20.244.56.144/test/posts'; // All posts
+        ? `http://20.244.56.144/test/users/${userid}/posts`
+        : 'http://20.244.56.144/test/posts';
       break;
+
     case 'comments':
-      apiUrl = 'http://20.244.56.144/test/comments';
+      apiUrl = postid
+        ? `http://20.244.56.144/test/posts/${postid}/comments`
+        : 'http://20.244.56.144/test/comments'; // Optional handling of post-specific comments
       break;
+
     case 'likes':
       apiUrl = 'http://20.244.56.144/test/likes';
       break;
+
     case 'shares':
       apiUrl = 'http://20.244.56.144/test/shares';
       break;
-    case 'users': // New route for fetching users
+
+    case 'users':
       apiUrl = 'http://20.244.56.144/test/users';
       break;
+
     default:
       return res.status(400).send({ error: 'Invalid social media type' });
   }
 
   try {
-    // Fetch data from the corresponding API with the Bearer token
+    // Fetch data from the API with Bearer token
     const response = await axios.get(apiUrl, {
       headers: {
         Authorization: `Bearer ${ACCESS_TOKEN}`,
       },
-      timeout: 500, // Set a timeout to prevent long wait times
+      timeout: 500,
     });
 
     const socialData = response.data;
 
-    // Check if the response contains valid data
+    // Check if valid response data is returned
     if (!socialData || typeof socialData !== 'object') {
       return res.status(500).send({ error: 'Invalid response from the social media API' });
     }
 
-    // Handle 'users' or 'posts/:userid' differently
+    // Handle response formatting based on the requested type
     if (type === 'users') {
       res.send({
         users: socialData.users,
+        meta: {
+          requestType: type,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    } else if (type === 'comments' && postid) {
+      res.send({
+        comments: socialData.comments,
+        postId: postid,
         meta: {
           requestType: type,
           timestamp: new Date().toISOString(),
