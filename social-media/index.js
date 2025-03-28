@@ -5,14 +5,12 @@ require('dotenv').config();
 const app = express();
 const port = 9877;
 
-const ACCESS_TOKEN = process.env.ACCESS_TOKEN; // Load token from .env file
+const ACCESS_TOKEN = process.env.ACCESS_TOKEN; 
 
-// Endpoint for handling different social media data requests
 app.get('/social/:type/:userid?/:postid?', async (req, res) => {
   const { type, userid, postid } = req.params;
   let apiUrl;
 
-  // Define routes dynamically based on the provided type, user ID, or post ID
   switch (type) {
     case 'posts':
       apiUrl = userid
@@ -23,7 +21,7 @@ app.get('/social/:type/:userid?/:postid?', async (req, res) => {
     case 'comments':
       apiUrl = postid
         ? `http://20.244.56.144/test/posts/${postid}/comments`
-        : 'http://20.244.56.144/test/comments'; // Optional handling of post-specific comments
+        : 'http://20.244.56.144/test/comments'; 
       break;
 
     case 'likes':
@@ -43,7 +41,7 @@ app.get('/social/:type/:userid?/:postid?', async (req, res) => {
   }
 
   try {
-    // Fetch data from the API with Bearer token
+    
     const response = await axios.get(apiUrl, {
       headers: {
         Authorization: `Bearer ${ACCESS_TOKEN}`,
@@ -53,12 +51,12 @@ app.get('/social/:type/:userid?/:postid?', async (req, res) => {
 
     const socialData = response.data;
 
-    // Check if valid response data is returned
+  
     if (!socialData || typeof socialData !== 'object') {
       return res.status(500).send({ error: 'Invalid response from the social media API' });
     }
 
-    // Handle response formatting based on the requested type
+  
     if (type === 'users') {
       res.send({
         users: socialData.users,
@@ -91,7 +89,6 @@ app.get('/social/:type/:userid?/:postid?', async (req, res) => {
   }
 });
 
-// Start the server
 app.listen(port, () => {
   console.log(`Social Media Microservice listening at http://localhost:${port}`);
 });
