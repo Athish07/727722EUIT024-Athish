@@ -15,18 +15,12 @@ app.get('/numbers/:numberid', async (req, res) => {
 
 
   switch (numberid) {
-    case 'p':
-      apiUrl = 'http://20.244.56.144/test/primes';
-      break;
     case 'f':
       apiUrl = 'http://20.244.56.144/test/fibo';
       break;
-    case 'e':
-      apiUrl = 'http://20.244.56.144/test/even';
-      break;
     case 'r':
       apiUrl = 'http://20.244.56.144/test/rand';
-      break;
+      break;    
     default:
       return res.status(400).send({ error: 'Invalid number ID' });
   }
