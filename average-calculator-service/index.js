@@ -61,6 +61,3 @@ app.get('/numbers/:numberid', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Average Calculator Microservice listening at http://localhost:${port}`);
-});
